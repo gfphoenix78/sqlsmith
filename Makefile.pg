@@ -1,0 +1,20 @@
+
+OBJS=dump.o  expr.o  grammar.o  impedance.o  log.o \
+	 postgres.o  prod.o  random.o  relmodel.o  schema.o  sqlsmith.o
+
+HEADERS=dump.hh  dut.hh  expr.hh  grammar.hh  impedance.hh  log.hh  postgres.hh  prod.hh  random.hh  relmodel.hh  schema.hh  util.hh
+
+CXXFLAGS += -Wall -Wextra -I. -g -ggdb3 -O2
+LDFLAGS += -lpqxx -lpq
+
+sqlsmith: $(OBJS)
+	$(CXX) -o $@ $^ $(LDFLAGS)
+
+%.o: %.cc $(HEADERS)
+	$(CXX) -c $(CXXFLAGS) $<
+
+clean:
+	$(RM) *.o sqlsmith
+
+.PHONY: clean
+
