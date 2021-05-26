@@ -31,7 +31,7 @@ pushd ${CWDIR}/../../
 createdb sqlsmith
 ldd ./sqlsmith | grep libpq
 
-./sqlsmith --verbose --target="port=\$PGPORT host=/tmp dbname=sqlsmith" --max-queries=10000
+./sqlsmith --verbose --target="port=\$PGPORT host=/tmp dbname=sqlsmith" --max-queries=100
 popd
 EOF
 

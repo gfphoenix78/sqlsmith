@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include <getopt.h>
 #include <iostream>
 #include <chrono>
 
@@ -57,45 +58,88 @@ extern "C" void cerr_log_handler(int)
   exit(1);
 }
 
+static void show_usage(int exitValue)
+{
+  cerr <<
+  "    --target=connstr     postgres database to send queries to" << endl <<
+#ifdef HAVE_LIBSQLITE3
+  "    --sqlite=URI         SQLite database to send queries to" << endl <<
+#endif
+#ifdef HAVE_MONETDB
+  "    --monetdb=connstr    MonetDB database to send queries to" <<endl <<
+#endif
+  "    --log-to=connstr     log errors to postgres database" << endl <<
+  "    --seed=int           seed RNG with specified int instead of PID" << endl <<
+  "    --dump-all-queries   print queries as they are generated" << endl <<
+  "    --dump-all-graphs    dump generated ASTs" << endl <<
+  "    --dry-run            print queries instead of executing them" << endl <<
+  "    --exclude-catalog    don't generate queries using catalog relations" << endl <<
+  "    --max-queries=long   terminate after generating this many queries" << endl <<
+  "    --rng-state=string    deserialize dumped rng state" << endl <<
+  "    --verbose            emit progress output" << endl <<
+  "    --version            print version information and exit" << endl <<
+  "    --help               print available command line options and exit" << endl;
+
+  exit(exitValue);
+}
+static void parse_args(int argc, char *argv[], map<string,string> &options)
+{
+  static struct option long_options[] = {
+    {"target",           required_argument, 0,  1 },
+#ifdef HAVE_LIBSQLITE3
+    {"sqlite",           required_argument, 0,  1 },
+#endif
+#ifdef HAVE_MONETDB
+    {"monetdb",          required_argument, 0,  1 },
+#endif
+    {"log-to",           required_argument, 0,  1 },
+    {"seed",             required_argument, 0,  1 },
+    {"max-queries",      required_argument, 0,  1 },
+    {"rng-state",        required_argument, 0,  1 },
+/* options without argument */
+    {"dump-all-queries", no_argument, 0,  0 },
+    {"dump-all-graphs",  no_argument, 0,  0 },
+    {"dry-run",          no_argument, 0,  0 },
+    {"exclude-catalog",  no_argument, 0,  0 },
+    {"verbose",          no_argument, 0,  0 },
+    {"version",          no_argument, 0,  0 },
+    {"help",             no_argument, 0,  0 },
+    {0,                  0,           0,  0 }
+  };
+  int option_index = 0;
+  int  c;
+  while ((c = getopt_long(argc, argv, "", long_options, &option_index)) != -1) {
+    switch (c) {
+      case 0:
+        options[long_options[option_index].name] = "";
+        break;
+      case 1:
+        options[long_options[option_index].name] = optarg;
+        break;
+      default:
+        cerr << "Usage:" << endl;
+        show_usage(1);
+        break;
+      }
+  }
+
+   if (optind < argc) {
+        printf("non-option ARGV-elements: ");
+        while (optind < argc)
+            printf("%s ", argv[optind++]);
+        printf("\n");
+    }
+}
+
 int main(int argc, char *argv[])
 {
   cerr << PACKAGE_NAME " " GITREV << endl;
 
   map<string,string> options;
-  regex optregex("--(help|log-to|verbose|target|sqlite|monetdb|version|dump-all-graphs|dump-all-queries|seed|dry-run|max-queries|rng-state|exclude-catalog)(?:=((?:.|\n)*))?");
-  
-  for(char **opt = argv+1 ;opt < argv+argc; opt++) {
-    smatch match;
-    string s(*opt);
-    if (regex_match(s, match, optregex)) {
-      options[string(match[1])] = match[2];
-    } else {
-      cerr << "Cannot parse option: " << *opt << endl;
-      options["help"] = "";
-    }
-  }
 
+  parse_args(argc, argv, options);
   if (options.count("help")) {
-    cerr <<
-      "    --target=connstr     postgres database to send queries to" << endl <<
-#ifdef HAVE_LIBSQLITE3
-      "    --sqlite=URI         SQLite database to send queries to" << endl <<
-#endif
-#ifdef HAVE_MONETDB
-      "    --monetdb=connstr    MonetDB database to send queries to" <<endl <<
-#endif
-      "    --log-to=connstr     log errors to postgres database" << endl <<
-      "    --seed=int           seed RNG with specified int instead of PID" << endl <<
-      "    --dump-all-queries   print queries as they are generated" << endl <<
-      "    --dump-all-graphs    dump generated ASTs" << endl <<
-      "    --dry-run            print queries instead of executing them" << endl <<
-      "    --exclude-catalog    don't generate queries using catalog relations" << endl <<
-      "    --max-queries=long   terminate after generating this many queries" << endl <<
-      "    --rng-state=string    deserialize dumped rng state" << endl <<
-      "    --verbose            emit progress output" << endl <<
-      "    --version            print version information and exit" << endl <<
-      "    --help               print available command line options and exit" << endl;
-    return 0;
+    show_usage(0);
   } else if (options.count("version")) {
     return 0;
   }
