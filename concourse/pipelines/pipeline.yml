@@ -1,0 +1,61 @@
+igroups:
+- name: All
+  jobs:
+  - sqlsmith_gpdb7_centos7
+
+#####################################################
+#################### RESOURCES ######################
+#####################################################
+
+resource_types:
+- name: gcs
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
+resources:
+# Image Resources
+- name: centos-gpdb-dev-7
+  type: docker-image
+  source:
+    repository: pivotaldata/centos-gpdb-dev
+    tag: '7-gcc6.2-llvm3.7'
+
+# Github Source Codes
+- name: gpdb_src
+  type: git
+  source:
+    branch: ((gpdb-git-branch))
+    uri: ((gpdb-git-remote))
+    ignore_paths:
+    - gpdb-doc/*
+    - README*
+- name: sqlsmith_src
+  type: git
+  source:
+    branch: gp-dev
+    uri: https://github.com/gfphoenix78/sqlsmith.git
+
+# ccp_src tag_filter is not maintained by gpdb_common-ci-secrets.yml
+# so we just pull the laster ccp_src without tag_filter
+- name: bin_gpdb_centos7
+  type: gcs
+  source:
+    bucket: ((gcs-bucket-intermediates))
+    json_key: ((concourse-gcs-resources-service-account-key))
+    versioned_file: 6X_STABLE/bin_gpdb_centos7/bin_gpdb.tar.gz
+
+jobs:
+- name: sqlsmith_gpdb7_centos7
+  plan:
+  - aggregate:
+    - get: gpdb_src
+    - get: sqlsmith_src
+      trigger: true
+    - get: bin_gpdb
+      resource: bin_gpdb_centos7
+    - get: centos-gpdb-dev-7
+  - task: run_sqlsmith
+    file: sqlsmith_src/concourse/tasks/test_sqlsmith.yml
+    image: centos-gpdb-dev-7
+    params:

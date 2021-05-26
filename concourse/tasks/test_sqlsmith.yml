@@ -1,0 +1,16 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+
+inputs:
+  - name: gpdb_src
+  - name: sqlsmith_src
+  - name: bin_gpdb
+
+outputs:
+
+run:
+  path: sqlsmith_src/concourse/scripts/test_sqlsmith.sh
+
+params:
