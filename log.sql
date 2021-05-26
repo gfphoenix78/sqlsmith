@@ -132,8 +132,8 @@ begin
 end
 $$ language plpgsql;
 
-create trigger discard_known before insert on error
-    for each row execute procedure discard_known();
+--create trigger discard_known before insert on error
+--    for each row execute procedure discard_known();
 
 -- YMMV.
 create index on error(t);
