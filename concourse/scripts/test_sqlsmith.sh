@@ -15,7 +15,7 @@ yum install -y libpqxx-devel
 function prepare_sqlsmith() {
 install_deps
 
-pushd ${CWDIR}
+pushd ${CWDIR}/../../
 bash build.bash sqlsmith
 popd
 }
@@ -27,7 +27,7 @@ set -exo pipefail
 source /usr/local/greenplum-db-devel/greenplum_path.sh
 source ${TOP_DIR}/gpdb_src/gpAux/gpdemo/gpdemo-env.sh
 
-pushd ${CWDIR}
+pushd ${CWDIR}/../../
 createdb sqlsmith
 ldd ./sqlsmith | grep libpq
 
