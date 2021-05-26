@@ -1,5 +1,6 @@
 #include "postgres.hh"
 #include "config.h"
+#include <string.h>
 #include <iostream>
 
 #ifndef HAVE_BOOST_REGEX

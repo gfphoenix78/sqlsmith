@@ -43,12 +43,12 @@ resources:
   source:
     bucket: ((gcs-bucket-intermediates))
     json_key: ((concourse-gcs-resources-service-account-key))
-    versioned_file: 6X_STABLE/bin_gpdb_centos7/bin_gpdb.tar.gz
+    versioned_file: ((gpdb-br))/bin_gpdb_centos7/bin_gpdb.tar.gz
 
 jobs:
 - name: sqlsmith_gpdb7_centos7
   plan:
-  - aggregate:
+  - in_parallel:
     - get: gpdb_src
     - get: sqlsmith_src
       trigger: true
