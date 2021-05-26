@@ -4,7 +4,7 @@ OBJS=dump.o  expr.o  grammar.o  impedance.o  log.o \
 
 HEADERS=dump.hh  dut.hh  expr.hh  grammar.hh  impedance.hh  log.hh  postgres.hh  prod.hh  random.hh  relmodel.hh  schema.hh  util.hh
 
-CXXFLAGS += -Wall -Wextra -I. -g -ggdb3 -O2
+CXXFLAGS += -Wall -Wextra -std=c++11 -I. -g -ggdb3 -O2
 LDFLAGS += -lpqxx -lpq
 
 sqlsmith: $(OBJS)
