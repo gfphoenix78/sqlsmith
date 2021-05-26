@@ -11,6 +11,10 @@
 #include "prod.hh"
 #include "dut.hh"
 
+void loadKnownErrors(const std::string &filename);
+bool isKnownError(const std::string &error);
+bool isKnownError(const char *error);
+
 /// logger base class
 struct logger {
   virtual void generated(prod &query) {(void)query; }
@@ -18,6 +22,10 @@ struct logger {
   virtual void error(prod &query, const dut::failure &e) {
     (void)query, (void)e;
   }
+  virtual void known_error(prod &query, const dut::failure &e) {
+    (void)query, (void)e;
+  }
+  bool dispatch_error(prod &query, const dut::failure &e);
 };
 
 /// logger to dump all generated queries
@@ -41,10 +49,12 @@ struct stats_collecting_logger : logger {
 struct cerr_logger : stats_collecting_logger {
   const int columns = 80;
   std::map<std::string, long> errors;
+  std::map<std::string, long> known_errors;
   virtual void report();
   virtual void generated(prod &query);
   virtual void executed(prod &query);
   virtual void error(prod &query, const dut::failure &e);
+  virtual void known_error(prod &query, const dut::failure &e);
   void report(prod &p);
 };
 
@@ -55,6 +65,7 @@ struct pqxx_logger : stats_collecting_logger {
   pqxx_logger(std::string target, std::string conninfo, struct schema &s);
   virtual void generated(prod &query);
   virtual void error(prod &query, const dut::failure &e);
+  virtual void known_error(prod &query, const dut::failure &e);
 };
 
 #endif

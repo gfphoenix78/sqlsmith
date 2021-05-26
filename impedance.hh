@@ -23,6 +23,7 @@ struct impedance_visitor : prod_visitor {
 struct impedance_feedback : logger {
   virtual void executed(prod &query);
   virtual void error(prod &query, const dut::failure &e);
+  virtual void known_error(prod &query, const dut::failure &e);
   impedance_feedback() { }
 };
 

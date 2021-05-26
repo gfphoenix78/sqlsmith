@@ -190,6 +190,8 @@ int main(int argc, char *argv[])
       else
 	dut = make_shared<dut_libpq>(options["target"]);
 
+      loadKnownErrors("known.txt");
+      int exitValue = 0;
       while (1) /* Loop to recover connection loss */
       {
 	try {
@@ -199,7 +201,7 @@ int main(int argc, char *argv[])
 		&& (++queries_generated > stol(options["max-queries"]))) {
 	      if (global_cerr_logger)
 		global_cerr_logger->report();
-	      return 0;
+	      return exitValue;
 	    }
 	    
 	    /* Invoke top-level production to generate AST */
@@ -220,13 +222,15 @@ int main(int argc, char *argv[])
 	    } catch (const dut::failure &e) {
 	      for (auto l : loggers)
 		try {
-		  l->error(*gen, e);
+                  exitValue += (int)l->dispatch_error(*gen, e);
 		} catch (runtime_error &e) {
+                  exitValue++;
 		  cerr << endl << "log failed: " << typeid(*l).name() << ": "
 		       << e.what() << endl;
 		}
 	      if ((dynamic_cast<const dut::broken *>(&e))) {
 		/* re-throw to outer loop to recover session. */
+                exitValue++;
 		throw;
 	      }
 	    }
@@ -234,6 +238,7 @@ int main(int argc, char *argv[])
 	}
 	catch (const dut::broken &e) {
 	  /* Give server some time to recover. */
+          exitValue = 1;
 	  this_thread::sleep_for(milliseconds(1000));
 	}
       }

@@ -1,14 +1,17 @@
 #include "impedance.hh"
 #include "log.hh"
 #include <iostream>
+#include <unordered_set>
 
 using namespace std;
 
+static map<const char*, long> occurances_in_known_error;
 static map<const char*, long> occurances_in_failed_query;
 static map<const char*, long> occurances_in_ok_query;
 static map<const char*, long> retries;
 static map<const char*, long> limited;
 static map<const char*, long> failed;
+std::unordered_set<std::string> query_with_syntax_error;
 
 impedance_visitor::impedance_visitor(map<const char*, long> &occured)
   :   _occured(occured)
@@ -36,6 +39,19 @@ void impedance_feedback::error(prod &query, const dut::failure &e)
   (void)e;
   impedance_visitor v(occurances_in_failed_query);
   query.accept(&v);
+  if (dynamic_cast<const dut::syntax *>(&e)) {
+    std::ostringstream oss;
+    oss << query;
+    query_with_syntax_error.insert(oss.str());
+  }
+
+}
+
+void impedance_feedback::known_error(prod &query, const dut::failure &e)
+{
+  (void)e;
+  impedance_visitor v(occurances_in_known_error);
+  query.accept(&v);
 }
 
 namespace impedance {
@@ -56,11 +72,20 @@ void report()
   cerr << "impedance report: " << endl;
   for (auto pair : occurances_in_failed_query) {
     cerr << "  " << pretty_type(pair.first) << ": " <<
-      pair.second << "/" << occurances_in_ok_query[pair.first]
-	 << " (bad/ok)";
+      pair.second << "/" << occurances_in_known_error[pair.first]
+      << "/" << occurances_in_ok_query[pair.first]
+	 << " (bad/known/ok)";
     if (!matched(pair.first))
       cerr << " -> BLACKLISTED";
     cerr << endl;
+  }
+  
+  cerr << "query with bad syntax:" << endl;
+  int index = 0;
+  for (auto &q : query_with_syntax_error) {
+    cerr << "QUERY [" << index << "]: ";
+    cerr << q << endl;
+    index++;
   }
 }
 

@@ -13,6 +13,7 @@ using boost::regex_match;
 #endif
 
 #include <string>
+#include <unordered_set>
 
 extern "C" {
 #include <unistd.h>
@@ -26,6 +27,57 @@ extern "C" {
 
 using namespace std;
 using namespace pqxx;
+
+std::unordered_set<std::string> known_errors;
+
+void loadKnownErrors(const std::string &filename)
+{
+    std::cout << "Loading known errors...";
+    char line[2048];
+    FILE *file = fopen(filename.c_str(), "r");
+    if (!file) {
+        std::cout << "Failed to open '" << filename << "': ";
+        std::cout << strerror(errno) << std::endl;
+        return;
+    }
+    while (fgets(line, sizeof(line), file) != NULL) {
+        auto len = strlen(line);
+        if (len > 0 && line[len - 1] == '\n')
+            line[--len] = '\0';
+        if (len > 0)
+            known_errors.insert(line);
+    }
+    fclose(file);
+    std::cout << "done." << std::endl;
+
+#if 0
+    std::cout << "Dump known errors:" << std::endl;
+    for (auto it = known_errors.begin(); it != known_errors.end(); ++it)
+        std::cout << "\t'" << *it << "'\n";
+#endif
+}
+bool isKnownError(const std::string &error)
+{
+    return known_errors.find(error) != known_errors.end();
+}
+bool isKnownError(const char *error)
+{
+    return known_errors.find(error) != known_errors.end();
+}
+
+// returns true if the error is unknown
+bool logger::dispatch_error(prod &query, const dut::failure &e)
+{
+  std::istringstream err(e.what());
+  std::string line;
+  getline(err, line);
+  auto known = isKnownError(line.substr(0, 80));
+  if (known)
+      this->known_error(query, e);
+  else
+      this->error(query, e);
+  return !known;
+}
 
 struct stats_visitor : prod_visitor {
   int nodes = 0;
@@ -85,10 +137,11 @@ void cerr_logger::report()
     long err_count = 0;
     for (auto e : report) {
       err_count += e.second;
-      cerr << e.second << "\t" << e.first.substr(0,80) << endl;
+      cerr << e.second << "\t'" << e.first.substr(0,80) << "'" << endl;
     }
     cerr << "error rate: " << (float)err_count/(queries) << endl;
     impedance::report();
+
 }
 
 
@@ -127,6 +180,17 @@ void cerr_logger::error(prod &query, const dut::failure &e)
     cerr << "C";
   else
     cerr << "e";
+}
+
+void cerr_logger::known_error(prod &query, const dut::failure &e)
+{
+  (void)query;
+  (void)e;
+  if (columns-1 == (queries%columns)) {
+    cerr << endl;
+  }
+  cerr << "K";
+
 }
 
 pqxx_logger::pqxx_logger(std::string target, std::string conninfo, struct schema &s)
@@ -171,6 +235,13 @@ void pqxx_logger::error(prod &query, const dut::failure &e)
   s << query;
   w.prepared("error")(e.what())(s.str())(e.sqlstate).exec();
   w.commit();
+}
+
+void pqxx_logger::known_error(prod &query, const dut::failure &e)
+{
+  // TODO: log known errors
+  (void)query;
+  (void)e;
 }
 
 void pqxx_logger::generated(prod &query)
