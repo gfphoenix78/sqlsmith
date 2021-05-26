@@ -35,7 +35,6 @@ ldd ./sqlsmith | grep libpq
 popd
 EOF
 
-  chown -R gpadmin:gpadmin $(pwd)
   pushd /home/gpadmin
     chown gpadmin:gpadmin  test_run.sh
     chmod a+x  test_run.sh
