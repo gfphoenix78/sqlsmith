@@ -16,6 +16,7 @@ using boost::regex_match;
 #include <unordered_set>
 
 extern "C" {
+#include <string.h>
 #include <unistd.h>
 }
 
