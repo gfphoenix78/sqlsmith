@@ -175,6 +175,7 @@ int main(int argc, char *argv[])
       } else {
 	   smith::rng.seed(options.count("seed") ? stoi(options["seed"]) : getpid());
       }
+      cout << "smith::rng = '" << smith::rng << "'" << endl;
 
       vector<shared_ptr<logger> > loggers;
 
