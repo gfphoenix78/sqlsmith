@@ -22,7 +22,7 @@ create table error (
     query text,  -- failed query
     target text, -- conninfo of the target
     sqlstate text, -- sqlstate of error
-    
+
     -- not referenced by sqlsmith:
     t timestamptz default now(),
     errid bigserial primary key
@@ -87,13 +87,13 @@ create view report24h as
        select count(1), error, max(e.t) as last_seen
        from base_error e join instance i on (e.id = i.id)
        where i.t > now() - interval '1 days'
-       	     group by 2 order by count desc;
+       group by 2 order by count desc;
 
 create view instance_activity as
        select i.hostname, i.target, max(e.t)
-       	      from instance i join error e on (i.id = e.id)
-	      group by i.hostname, i.target
-              order by max desc;
+       from instance i join error e on (i.id = e.id)
+       group by i.hostname, i.target
+       order by max desc;
 
 comment on view instance_activity is 'time of last error message from instance';
 
@@ -118,17 +118,17 @@ comment on table known_re is 'regular expressions to match error messages to rej
 
 create or replace function discard_known() returns trigger as $$
 begin
-	if exists (select 1 from boring_sqlstates b where new.sqlstate = b.sqlstate)
-	   or exists (select 1 from known where firstline(new.msg) = error)
-	then
-	   return NULL;
-        end if;
-	
-	if new.msg ~ ANY (select re from known_re)
-        then
-	   return NULL;
-	end if;
-	return new;
+    if exists (select 1 from boring_sqlstates b where new.sqlstate = b.sqlstate)
+       or exists (select 1 from known where firstline(new.msg) = error)
+    then
+       return NULL;
+    end if;
+
+    if new.msg ~ ANY (select re from known_re)
+    then
+       return NULL;
+    end if;
+    return new;
 end
 $$ language plpgsql;
 
@@ -141,20 +141,20 @@ create index on error(t);
 -- Following views are used for debugging sqlsmith
 create view impedance as
     select id, generated, level, nodes, updated,
-    	   prod, ok, bad, js.retries, limited, failed
+        prod, ok, bad, js.retries, limited, failed
     from stat, jsonb_to_recordset(impedance->'impedance')
-    	 js(prod text, ok bigint, bad bigint, retries bigint, limited bigint, failed bigint)
+        js(prod text, ok bigint, bad bigint, retries bigint, limited bigint, failed bigint)
     where impedance is not null;
 
 comment on view impedance is 'stat table with normalized jsonb';
 
 create view impedance_report as
   select rev, prod,
-  	 sum(generated) as generated, sum(ok) as ok,
-	 sum(bad) as bad,
-	 sum(retries) as retries,
-	 sum(limited)as limited,
-	 sum(failed) as failed
+    sum(generated) as generated, sum(ok) as ok,
+    sum(bad) as bad,
+    sum(retries) as retries,
+    sum(limited)as limited,
+    sum(failed) as failed
   from impedance natural join instance
   where rev = (select max(rev) from instance where version ~* 'postgres')
   group by rev, prod

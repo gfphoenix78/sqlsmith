@@ -20,7 +20,7 @@ struct schema {
   sqltype *arraytype;
 
   std::vector<sqltype *> types;
-  
+
   std::vector<table> tables;
   std::vector<op> operators;
   std::vector<routine> routines;
@@ -43,9 +43,9 @@ struct schema {
 
   const char *true_literal = "true";
   const char *false_literal = "false";
-  
+
   virtual std::string quote_name(const std::string &id) = 0;
-  
+
   void summary() {
     std::cout << "Found " << tables.size() <<
       " user table(s) in information schema." << std::endl;

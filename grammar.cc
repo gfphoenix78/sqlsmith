@@ -16,9 +16,9 @@ shared_ptr<table_ref> table_ref::factory(prod *p) {
   try {
     if (p->level < 3 + d6()) {
       if (d6() > 3 && p->level < d6())
-	return make_shared<table_subquery>(p);
+        return make_shared<table_subquery>(p);
       if (d6() > 3)
-	return make_shared<joined_table>(p);
+        return make_shared<joined_table>(p);
     }
     if (d6() > 3)
       return make_shared<table_or_query_name>(p);
@@ -42,9 +42,9 @@ void table_or_query_name::out(std::ostream &out) {
 target_table::target_table(prod *p, table *victim) : table_ref(p)
 {
   while (! victim
-	 || victim->schema == "pg_catalog"
-	 || !victim->is_base_table
-	 || !victim->columns().size()) {
+         || victim->schema == "pg_catalog"
+         || !victim->is_base_table
+         || !victim->columns().size()) {
     struct named_relation *pick = random_pick(scope->tables);
     victim = dynamic_cast<table *>(pick);
     retry();
@@ -65,7 +65,7 @@ table_sample::table_sample(prod *p) : table_ref(p) {
     t = dynamic_cast<struct table*>(pick);
     retry();
   } while (!t || !t->is_base_table);
-  
+
   refs.push_back(make_shared<aliased_relation>(scope->stmt_uid("sample"), t));
   percent = 0.1 * d100();
   method = (d6() > 2) ? "system" : "bernoulli";
@@ -95,15 +95,15 @@ void table_subquery::accept(prod_visitor *v) {
 
 shared_ptr<join_cond> join_cond::factory(prod *p, table_ref &lhs, table_ref &rhs)
 {
-     try {
-	  if (d6() < 6)
-	       return make_shared<expr_join_cond>(p, lhs, rhs);
-	  else
-	       return make_shared<simple_join_cond>(p, lhs, rhs);
-     } catch (runtime_error &e) {
-	  p->retry();
-     }
-     return factory(p, lhs, rhs);
+  try {
+    if (d6() < 6)
+         return make_shared<expr_join_cond>(p, lhs, rhs);
+    else
+         return make_shared<simple_join_cond>(p, lhs, rhs);
+    } catch (runtime_error &e) {
+    p->retry();
+    }
+    return factory(p, lhs, rhs);
 }
 
 simple_join_cond::simple_join_cond(prod *p, table_ref &lhs, table_ref &rhs)
@@ -111,7 +111,7 @@ simple_join_cond::simple_join_cond(prod *p, table_ref &lhs, table_ref &rhs)
 {
 retry:
   named_relation *left_rel = &*random_pick(lhs.refs);
-  
+
   if (!left_rel->columns().size())
     { retry(); goto retry; }
 
@@ -122,7 +122,7 @@ retry:
   for (auto c2 : right_rel->columns()) {
     if (c1.type == c2.type) {
       condition +=
-	left_rel->ident() + "." + c1.name + " = " + right_rel->ident() + "." + c2.name + " ";
+        left_rel->ident() + "." + c1.name + " = " + right_rel->ident() + "." + c2.name + " ";
       break;
     }
   }
@@ -132,18 +132,18 @@ retry:
 }
 
 void simple_join_cond::out(std::ostream &out) {
-     out << condition;
+  out << condition;
 }
 
 expr_join_cond::expr_join_cond(prod *p, table_ref &lhs, table_ref &rhs)
      : join_cond(p, lhs, rhs), joinscope(p->scope)
 {
-     scope = &joinscope;
-     for (auto ref: lhs.refs)
-	  joinscope.refs.push_back(&*ref);
-     for (auto ref: rhs.refs)
-	  joinscope.refs.push_back(&*ref);
-     search = bool_expr::factory(this);
+  scope = &joinscope;
+  for (auto ref: lhs.refs)
+    joinscope.refs.push_back(&*ref);
+  for (auto ref: rhs.refs)
+    joinscope.refs.push_back(&*ref);
+  search = bool_expr::factory(this);
 }
 
 void expr_join_cond::out(std::ostream &out) {
@@ -265,17 +265,17 @@ struct for_update_verify : prod_visitor {
     if (tab) {
       table *actual_table = dynamic_cast<table*>(tab->t);
       if (actual_table && !actual_table->is_insertable)
-	throw("read only");
+        throw("read only");
       if (actual_table->name.find("pg_"))
-	throw("catalog");
+        throw("catalog");
     }
     table_sample* sample = dynamic_cast<table_sample*>(p);
     if (sample) {
       table *actual_table = dynamic_cast<table*>(sample->t);
       if (actual_table && !actual_table->is_insertable)
-	throw("read only");
+        throw("read only");
       if (actual_table->name.find("pg_"))
-	throw("catalog");
+        throw("catalog");
     }
   } ;
 };
@@ -319,10 +319,10 @@ query_spec::query_spec(prod *p, struct scope *s, bool lateral) :
 
   if (lateral)
     scope->refs = s->refs;
-  
+
   from_clause = make_shared<struct from_clause>(this);
   select_list = make_shared<struct select_list>(this);
-  
+
   set_quantifier = (d100() == 1) ? "distinct" : "";
 
   search = bool_expr::factory(this);
@@ -343,9 +343,9 @@ void modifying_stmt::pick_victim()
       victim = dynamic_cast<struct table*>(pick);
       retry();
     } while (! victim
-	   || victim->schema == "pg_catalog"
-	   || !victim->is_base_table
-	   || !victim->columns().size());
+             || victim->schema == "pg_catalog"
+             || !victim->is_base_table
+             || !victim->columns().size());
 }
 
 modifying_stmt::modifying_stmt(prod *p, struct scope *s, table *victim)
@@ -393,7 +393,7 @@ void insert_stmt::out(std::ostream &out)
   }
 
   out << "values (";
-  
+
   for (auto expr = value_exprs.begin();
        expr != value_exprs.end();
        expr++) {
@@ -410,7 +410,7 @@ set_list::set_list(prod *p, table *target) : prod(p)
   do {
     for (auto col : target->columns()) {
       if (d6() < 4)
-	continue;
+        continue;
       auto expr = value_expr::factory(this, col.type);
       value_exprs.push_back(expr);
       names.push_back(col.name);
@@ -457,7 +457,7 @@ upsert_stmt::upsert_stmt(prod *p, struct scope *s, table *v)
 
   if (!victim->constraints.size())
     fail("need table w/ constraint for upsert");
-    
+
   set_list = std::make_shared<struct set_list>(this, victim);
   search = bool_expr::factory(this);
   constraint = random_pick(victim->constraints);
@@ -579,7 +579,7 @@ void merge_stmt::accept(prod_visitor *v)
   join_condition->accept(v);
   for (auto p : clauselist)
     p->accept(v);
-    
+
 }
 
 when_clause::when_clause(merge_stmt *p)
@@ -612,7 +612,7 @@ when_clause_update::when_clause_update(merge_stmt *p)
   myscope.refs = scope->refs;
   scope = &myscope;
   scope->refs.push_back(&*(p->target_table_->refs[0]));
-  
+
   set_list = std::make_shared<struct set_list>(this, p->victim);
 }
 

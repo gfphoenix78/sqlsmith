@@ -33,37 +33,31 @@ std::unordered_set<std::string> known_errors;
 
 void loadKnownErrors(const std::string &filename)
 {
-    std::cout << "Loading known errors...";
-    char line[2048];
-    FILE *file = fopen(filename.c_str(), "r");
-    if (!file) {
-        std::cout << "Failed to open '" << filename << "': ";
-        std::cout << strerror(errno) << std::endl;
-        return;
-    }
-    while (fgets(line, sizeof(line), file) != NULL) {
-        auto len = strlen(line);
-        if (len > 0 && line[len - 1] == '\n')
-            line[--len] = '\0';
-        if (len > 0)
-            known_errors.insert(line);
-    }
-    fclose(file);
-    std::cout << "done." << std::endl;
-
-#if 0
-    std::cout << "Dump known errors:" << std::endl;
-    for (auto it = known_errors.begin(); it != known_errors.end(); ++it)
-        std::cout << "\t'" << *it << "'\n";
-#endif
+  std::cout << "Loading known errors...";
+  char line[2048];
+  FILE *file = fopen(filename.c_str(), "r");
+  if (!file) {
+      std::cout << "Failed to open '" << filename << "': ";
+      std::cout << strerror(errno) << std::endl;
+      return;
+  }
+  while (fgets(line, sizeof(line), file) != NULL) {
+      auto len = strlen(line);
+      if (len > 0 && line[len - 1] == '\n')
+          line[--len] = '\0';
+      if (len > 0)
+          known_errors.insert(line);
+  }
+  fclose(file);
+  std::cout << "done." << std::endl;
 }
 bool isKnownError(const std::string &error)
 {
-    return known_errors.find(error) != known_errors.end();
+  return known_errors.find(error) != known_errors.end();
 }
 bool isKnownError(const char *error)
 {
-    return known_errors.find(error) != known_errors.end();
+  return known_errors.find(error) != known_errors.end();
 }
 
 // returns true if the error is unknown
@@ -98,9 +92,9 @@ struct stats_visitor : prod_visitor {
     for (auto p : production_stats)
       report.push_back(p);
     stable_sort(report.begin(), report.end(),
-		[](const pair<std::string, long> &a,
-		   const pair<std::string, long> &b)
-		{ return a.second > b.second; });
+                [](const pair<std::string, long> &a,
+                   const pair<std::string, long> &b)
+                { return a.second > b.second; });
     for (auto p : report) {
       cerr << p.second << "\t" << p.first << endl;
     }
@@ -110,7 +104,7 @@ struct stats_visitor : prod_visitor {
 void stats_collecting_logger::generated(prod &query)
 {
   queries++;
-  
+
   stats_visitor v;
   query.accept(&v);
 
@@ -121,27 +115,27 @@ void stats_collecting_logger::generated(prod &query)
 
 void cerr_logger::report()
 {
-    cerr << endl << "queries: " << queries << endl;
+  cerr << endl << "queries: " << queries << endl;
 // 	 << " (" << 1000.0*query_count/gen_time.count() << " gen/s, "
 // 	 << 1000.0*query_count/query_time.count() << " exec/s)" << endl;
-    cerr << "AST stats (avg): height = " << sum_height/queries
-	 << " nodes = " << sum_nodes/queries << endl;
+  cerr << "AST stats (avg): height = " << sum_height/queries
+    << " nodes = " << sum_nodes/queries << endl;
 
-    vector<pair<std::string, long> > report;
-    for (auto e : errors) {
-      report.push_back(e);
-    }
-    stable_sort(report.begin(), report.end(),
-		[](const pair<std::string, long> &a,
-		   const pair<std::string, long> &b)
-		{ return a.second > b.second; });
-    long err_count = 0;
-    for (auto e : report) {
-      err_count += e.second;
-      cerr << e.second << "\t'" << e.first.substr(0,80) << "'" << endl;
-    }
-    cerr << "error rate: " << (float)err_count/(queries) << endl;
-    impedance::report();
+  vector<pair<std::string, long> > report;
+  for (auto e : errors) {
+    report.push_back(e);
+  }
+  stable_sort(report.begin(), report.end(),
+              [](const pair<std::string, long> &a,
+                 const pair<std::string, long> &b)
+              { return a.second > b.second; });
+  long err_count = 0;
+  for (auto e : report) {
+    err_count += e.second;
+    cerr << e.second << "\t'" << e.first.substr(0,80) << "'" << endl;
+  }
+  cerr << "error rate: " << (float)err_count/(queries) << endl;
+  impedance::report();
 
 }
 
@@ -202,28 +196,28 @@ pqxx_logger::pqxx_logger(std::string target, std::string conninfo, struct schema
   w.exec("set application_name to '" PACKAGE "::log';");
 
   c->prepare("instance",
-	     "insert into instance (rev, target, hostname, version, seed) "
-	     "values ($1, $2, $3, $4, $5) returning id");
+             "insert into instance (rev, target, hostname, version, seed) "
+             "values ($1, $2, $3, $4, $5) returning id");
 
   char hostname[1024];
   gethostname(hostname, sizeof(hostname));
 
   ostringstream seed;
   seed << smith::rng;
-    
+
   result r = w.prepared("instance")(GITREV)(target)(hostname)(s.version)(seed.str()).exec();
-  
+
   id = r[0][0].as<long>(id);
 
   c->prepare("error",
-	     "insert into error (id, msg, query, sqlstate) "
-	     "values (" + to_string(id) + ", $1, $2, $3)");
+             "insert into error (id, msg, query, sqlstate) "
+             "values (" + to_string(id) + ", $1, $2, $3)");
 
   w.exec("insert into stat (id) values (" + to_string(id) + ")");
   c->prepare("stat",
-	     "update stat set generated=$1, level=$2, nodes=$3, updated=now() "
-	     ", retries = $4, impedance = $5 "
-	     "where id = " + to_string(id));
+             "update stat set generated=$1, level=$2, nodes=$3, updated=now() "
+             ", retries = $4, impedance = $5 "
+             "where id = " + to_string(id));
 
   w.commit();
 

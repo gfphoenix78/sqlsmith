@@ -24,12 +24,12 @@ struct pg_type : sqltype {
   OID typarray_;
   char typtype_;
   pg_type(string name,
-	  OID oid,
-	  char typdelim,
-	  OID typrelid,
-	  OID typelem,
-	  OID typarray,
-	  char typtype)
+  OID oid,
+  char typdelim,
+  OID typrelid,
+  OID typelem,
+  OID typarray,
+  char typtype)
     : sqltype(name), oid_(oid), typdelim_(typdelim), typrelid_(typrelid),
       typelem_(typelem), typarray_(typarray), typtype_(typtype) { }
 

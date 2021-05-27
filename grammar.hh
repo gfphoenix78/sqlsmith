@@ -60,30 +60,30 @@ struct lateral_subquery : table_subquery {
 };
 
 struct join_cond : prod {
-     static shared_ptr<join_cond> factory(prod *p, table_ref &lhs, table_ref &rhs);
-     join_cond(prod *p, table_ref &lhs, table_ref &rhs)
-	  : prod(p) { (void) lhs; (void) rhs;}
+  static shared_ptr<join_cond> factory(prod *p, table_ref &lhs, table_ref &rhs);
+  join_cond(prod *p, table_ref &lhs, table_ref &rhs)
+          : prod(p) { (void) lhs; (void) rhs;}
 };
 
 struct simple_join_cond : join_cond {
-     std::string condition;
-     simple_join_cond(prod *p, table_ref &lhs, table_ref &rhs);
-     virtual void out(std::ostream &out);
+  std::string condition;
+  simple_join_cond(prod *p, table_ref &lhs, table_ref &rhs);
+  virtual void out(std::ostream &out);
 };
 
 struct expr_join_cond : join_cond {
-     struct scope joinscope;
-     shared_ptr<bool_expr> search;
-     expr_join_cond(prod *p, table_ref &lhs, table_ref &rhs);
-     virtual void out(std::ostream &out);
-     virtual void accept(prod_visitor *v) {
-	  search->accept(v);
-	  v->visit(this);
-     }
+  struct scope joinscope;
+  shared_ptr<bool_expr> search;
+  expr_join_cond(prod *p, table_ref &lhs, table_ref &rhs);
+  virtual void out(std::ostream &out);
+  virtual void accept(prod_visitor *v) {
+    search->accept(v);
+    v->visit(this);
+  }
 };
 
 struct joined_table : table_ref {
-  virtual void out(std::ostream &out);  
+  virtual void out(std::ostream &out);
   joined_table(prod *p);
   std::string type;
   std::string alias;
@@ -258,7 +258,7 @@ struct update_stmt : modifying_stmt {
 
 struct when_clause : prod {
   bool matched;
-  shared_ptr<bool_expr> condition;  
+  shared_ptr<bool_expr> condition;
 //   shared_ptr<prod> merge_action;
   when_clause(struct merge_stmt *p);
   virtual ~when_clause() { }

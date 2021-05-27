@@ -17,7 +17,7 @@ using namespace std;
 
 static regex e_syntax("near \".*\": syntax error");
 static regex e_user_abort("callback requested query abort");
-  
+
 extern "C"  {
 #include <sqlite3.h>
 #include <unistd.h>
@@ -89,11 +89,11 @@ sqlite_connection::~sqlite_connection()
 schema_sqlite::schema_sqlite(std::string &conninfo, bool no_catalog)
   : sqlite_connection(conninfo)
 {
-	std::string query = "SELECT * FROM main.sqlite_master where type in ('table', 'view')";
+  std::string query = "SELECT * FROM main.sqlite_master where type in ('table', 'view')";
 
-	if (no_catalog)
-		query+= " AND name NOT like 'sqlite_%%'";
-  
+  if (no_catalog)
+    query+= " AND name NOT like 'sqlite_%%'";
+
   version = "SQLite " SQLITE_VERSION " " SQLITE_SOURCE_ID;
 
 //   sqlite3_busy_handler(db, my_sqlite3_busy_handler, 0);
@@ -108,11 +108,11 @@ schema_sqlite::schema_sqlite(std::string &conninfo, bool no_catalog)
 
   if (!no_catalog)
   {
-		// sqlite_master doesn't list itself, do it manually
-		table tab("sqlite_master", "main", false, false);
-		tables.push_back(tab);
+    // sqlite_master doesn't list itself, do it manually
+    table tab("sqlite_master", "main", false, false);
+    tables.push_back(tab);
   }
-  
+
   cerr << "done." << endl;
 
   cerr << "Loading columns and constraints...";
@@ -159,31 +159,31 @@ schema_sqlite::schema_sqlite(std::string &conninfo, bool no_catalog)
 
   BINOP(AND, INTEGER);
   BINOP(OR, INTEGER);
-  
-#define FUNC(n,r) do {							\
-    routine proc("", "", sqltype::get(#r), #n);				\
-    register_routine(proc);						\
+
+#define FUNC(n,r) do {              \
+    routine proc("", "", sqltype::get(#r), #n);        \
+    register_routine(proc);            \
   } while(0)
 
-#define FUNC1(n,r,a) do {						\
-    routine proc("", "", sqltype::get(#r), #n);				\
-    proc.argtypes.push_back(sqltype::get(#a));				\
-    register_routine(proc);						\
+#define FUNC1(n,r,a) do {            \
+    routine proc("", "", sqltype::get(#r), #n);        \
+    proc.argtypes.push_back(sqltype::get(#a));        \
+    register_routine(proc);            \
   } while(0)
 
-#define FUNC2(n,r,a,b) do {						\
-    routine proc("", "", sqltype::get(#r), #n);				\
-    proc.argtypes.push_back(sqltype::get(#a));				\
-    proc.argtypes.push_back(sqltype::get(#b));				\
-    register_routine(proc);						\
+#define FUNC2(n,r,a,b) do {            \
+    routine proc("", "", sqltype::get(#r), #n);        \
+    proc.argtypes.push_back(sqltype::get(#a));        \
+    proc.argtypes.push_back(sqltype::get(#b));        \
+    register_routine(proc);            \
   } while(0)
 
-#define FUNC3(n,r,a,b,c) do {						\
-    routine proc("", "", sqltype::get(#r), #n);				\
-    proc.argtypes.push_back(sqltype::get(#a));				\
-    proc.argtypes.push_back(sqltype::get(#b));				\
-    proc.argtypes.push_back(sqltype::get(#c));				\
-    register_routine(proc);						\
+#define FUNC3(n,r,a,b,c) do {            \
+    routine proc("", "", sqltype::get(#r), #n);        \
+    proc.argtypes.push_back(sqltype::get(#a));        \
+    proc.argtypes.push_back(sqltype::get(#b));        \
+    proc.argtypes.push_back(sqltype::get(#c));        \
+    register_routine(proc);            \
   } while(0)
 
   FUNC(last_insert_rowid, INTEGER);
@@ -226,10 +226,10 @@ schema_sqlite::schema_sqlite(std::string &conninfo, bool no_catalog)
   FUNC3(replace, TEXT, TEXT, TEXT, TEXT);
 
 
-#define AGG(n,r, a) do {						\
-    routine proc("", "", sqltype::get(#r), #n);				\
-    proc.argtypes.push_back(sqltype::get(#a));				\
-    register_aggregate(proc);						\
+#define AGG(n,r, a) do {            \
+    routine proc("", "", sqltype::get(#r), #n);        \
+    proc.argtypes.push_back(sqltype::get(#a));        \
+    register_aggregate(proc);            \
   } while(0)
 
   AGG(avg, INTEGER, INTEGER);
@@ -278,12 +278,12 @@ void dut_sqlite::test(const std::string &stmt)
   if( rc!=SQLITE_OK ){
     try {
       if (regex_match(zErrMsg, e_syntax))
-	throw dut::syntax(zErrMsg);
+  throw dut::syntax(zErrMsg);
       else if (regex_match(zErrMsg, e_user_abort)) {
-	sqlite3_free(zErrMsg);
-	return;
-      } else 
-	throw dut::failure(zErrMsg);
+  sqlite3_free(zErrMsg);
+  return;
+      } else
+  throw dut::failure(zErrMsg);
     } catch (dut::failure &e) {
       sqlite3_free(zErrMsg);
       throw;

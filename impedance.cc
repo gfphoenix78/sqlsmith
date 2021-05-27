@@ -55,7 +55,7 @@ void impedance_feedback::known_error(prod &query, const dut::failure &e)
 }
 
 namespace impedance {
-  
+
 bool matched(const char *name)
 {
   if (100 > occurances_in_failed_query[name])
@@ -71,15 +71,15 @@ void report()
 {
   cerr << "impedance report: " << endl;
   for (auto pair : occurances_in_failed_query) {
-    cerr << "  " << pretty_type(pair.first) << ": " <<
-      pair.second << "/" << occurances_in_known_error[pair.first]
+    cerr << "  " << pretty_type(pair.first) << ": "
+      << pair.second << "/" << occurances_in_known_error[pair.first]
       << "/" << occurances_in_ok_query[pair.first]
-	 << " (bad/known/ok)";
+      << " (bad/known/ok)";
     if (!matched(pair.first))
       cerr << " -> BLACKLISTED";
     cerr << endl;
   }
-  
+
   cerr << "query with bad syntax: count=" << query_with_syntax_error.size() << endl;
   int index = 0;
   for (auto &q : query_with_syntax_error) {
@@ -97,11 +97,11 @@ void report(std::ostream &out)
        pair != occurances_in_failed_query.end();
        ++pair) {
     out << "{\"prod\": \"" << pretty_type(pair->first) << "\","
-	<< "\"bad\": " << pair->second << ", "
-	<< "\"ok\": " << occurances_in_ok_query[pair->first] << ", "
-	<< "\"limited\": " << limited[pair->first] << ", "
-	<< "\"failed\": " << failed[pair->first] << ", "
-	<< "\"retries\": " << retries[pair->first] << "} ";
+      << "\"bad\": " << pair->second << ", "
+      << "\"ok\": " << occurances_in_ok_query[pair->first] << ", "
+      << "\"limited\": " << limited[pair->first] << ", "
+      << "\"failed\": " << failed[pair->first] << ", "
+      << "\"retries\": " << retries[pair->first] << "} ";
 
     if (next(pair) != occurances_in_failed_query.end())
       out << "," << endl;
