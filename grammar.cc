@@ -13,17 +13,24 @@
 using namespace std;
 
 shared_ptr<table_ref> table_ref::factory(prod *p) {
+  auto support_tablesample = p->scope->schema->support_feature("tablesample");
   try {
+retry:
     if (p->level < 3 + d6()) {
       if (d6() > 3 && p->level < d6())
         return make_shared<table_subquery>(p);
       if (d6() > 3)
         return make_shared<joined_table>(p);
     }
-    if (d6() > 3)
-      return make_shared<table_or_query_name>(p);
+    if (support_tablesample) {
+        if (d6() > 3)
+          return make_shared<table_or_query_name>(p);
+        else
+          return make_shared<table_sample>(p);
+    } else if (d6() >= 3)
+        return make_shared<table_or_query_name>(p);
     else
-      return make_shared<table_sample>(p);
+        goto retry;
   } catch (runtime_error &e) {
     p->retry();
   }

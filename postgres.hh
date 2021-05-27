@@ -42,10 +42,12 @@ struct schema_pqxx : public schema {
   pqxx::connection c;
   map<OID, pg_type*> oid2type;
   map<string, pg_type*> name2type;
+  map<std::string, bool> supported_features;
 
   virtual std::string quote_name(const std::string &id) {
     return c.quote_name(id);
   }
+  virtual bool support_feature(const std::string &feature_name) override;
   schema_pqxx(std::string &conninfo, bool no_catalog);
 };
 

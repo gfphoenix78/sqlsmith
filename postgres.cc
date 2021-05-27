@@ -104,6 +104,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
   r = w.exec("SHOW server_version_num");
   version_num = r[0][0].as<int>();
 
+  supported_features["tablesample"] = version_num >= 90500;
   // address the schema change in postgresql 11 that replaced proisagg and proiswindow with prokind
   string procedure_is_aggregate = version_num < 110000 ? "proisagg" : "prokind = 'a'";
   string procedure_is_window = version_num < 110000 ? "proiswindow" : "prokind = 'w'";
@@ -284,6 +285,11 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
   cerr << "done." << endl;
   c.disconnect();
   generate_indexes();
+}
+
+bool schema_pqxx::support_feature(const std::string &feature_name)
+{
+  return supported_features[feature_name];
 }
 
 extern "C" {

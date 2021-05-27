@@ -45,6 +45,7 @@ struct schema {
   const char *false_literal = "false";
 
   virtual std::string quote_name(const std::string &id) = 0;
+  virtual bool support_feature(const std::string &feature_name) { (void)feature_name; return true; }
 
   void summary() {
     std::cout << "Found " << tables.size() <<

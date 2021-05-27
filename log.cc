@@ -184,7 +184,7 @@ void cerr_logger::known_error(prod &query, const dut::failure &e)
   if (columns-1 == (queries%columns)) {
     cerr << endl;
   }
-  cerr << "K";
+  cerr << "#";
 
 }
 
