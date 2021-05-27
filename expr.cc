@@ -192,6 +192,38 @@ void coalesce::out(std::ostream &out)
   out << " as " << type->name << ")";
 }
 
+nullif::nullif(prod *p, sqltype *type_constraint)
+    : value_expr(p)
+{
+  std::vector<sqltype*> second_types;
+  first_expr = value_expr::factory(this, type_constraint);
+  auto &idx = p->scope->schema->operators_returning_type;
+  auto iters = idx.equal_range(scope->schema->booltype);
+  sqltype *oper;
+  type = first_expr->type;
+  assert(!type_constraint || type == type_constraint);
+  // opname is '=', and left is type_constraint
+  for (auto it = iters.first; it != iters.second; ++it) {
+    if (it->second->name != "=")
+      continue;
+    if (it->second->left == type) {
+      second_types.push_back(it->second->right);
+    }
+  }
+  if (second_types.empty())
+    throw ("can't find nullif");
+  
+  oper = random_pick<>(second_types);
+  second_expr = value_expr::factory(this, oper);
+}
+
+void nullif::out(std::ostream &out)
+{
+  out << "nullif(" << *first_expr << ", "
+    << *second_expr << ")"
+    << " as " << type->name << ")";
+}
+
 const_expr::const_expr(prod *p, sqltype *type_constraint)
     : value_expr(p), expr("")
 {

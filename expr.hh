@@ -65,7 +65,7 @@ struct column_reference: value_expr {
   virtual ~column_reference() { }
 };
 
-struct coalesce : value_expr {
+struct coalesce final : value_expr {
   const char *abbrev_;
   vector<shared_ptr<value_expr> > value_exprs;
   virtual ~coalesce() { };
@@ -78,11 +78,19 @@ struct coalesce : value_expr {
   }
 };
 
-struct nullif : coalesce {
+struct nullif final : value_expr {
+ shared_ptr<value_expr> first_expr;
+ shared_ptr<value_expr> second_expr;
+ virtual void out(std::ostream &out);
  virtual ~nullif() { };
-     nullif(prod *p, sqltype *type_constraint = 0)
-	  : coalesce(p, type_constraint, "nullif")
-	  { };
+     nullif(prod *p, sqltype *type_constraint = 0);
+//	  : coalesce(p, type_constraint, "nullif")
+//	  { };
+  virtual void accept(prod_visitor *v) {
+    v->visit(this);
+    first_expr->accept(v);
+    second_expr->accept(v);
+  }
 };
 
 struct bool_expr : value_expr {
