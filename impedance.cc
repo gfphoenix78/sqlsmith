@@ -80,7 +80,7 @@ void report()
     cerr << endl;
   }
   
-  cerr << "query with bad syntax:" << endl;
+  cerr << "query with bad syntax: count=" << query_with_syntax_error.size() << endl;
   int index = 0;
   for (auto &q : query_with_syntax_error) {
     cerr << "QUERY [" << index << "]: ";
