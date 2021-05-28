@@ -1,216 +1,161 @@
-ERROR:  cannot cast type unknown to anyenum
-ERROR:  operator does not exist: point = point
-ERROR:  type "character_data" does not exist
-ERROR:  type "sql_identifier" does not exist
-ERROR:  syntax error at or near "MERGE"
 ERROR:  canceling statement due to statement timeout
-ERROR:  operator does not exist: polygon = polygon
-ERROR:  WITHIN GROUP is required for ordered-set aggregate pg_catalog.median
-ERROR:  operator does not exist: cstring = cstring
-ERROR:  operator does not exist: name @> name
-ERROR:  function with EXECUTE ON restrictions cannot be used in the SELECT list
-ERROR:  syntax error at or near "desc"
-ERROR:  INSERT has more expressions than target columns
-ERROR:  operator does not exist: name <@ name
-ERROR:  type "cardinal_number" does not exist
-ERROR:  cannot assign to system column "gp_segment_id"
-ERROR:  function gp_deprecated() has been deprecated
-ERROR:  type "yes_or_no" does not exist
-ERROR:  operator does not exist: name && name
-ERROR:  could not implement window PARTITION BY
-ERROR:  operator does not exist: anyrange @> oid
-ERROR:  operator does not exist: information_schema.sql_identifier <@ anyrange
-ERROR:  COALESCE types anyrange and daterange cannot be matched
-ERROR:  could not identify an ordering operator for type aclitem[]
-ERROR:  could not identify an ordering operator for type xid
-ERROR:  external table __gp_log_master_ext command ended with SHELL TERMINATED b
-ERROR:  operator does not exist: anyrange @> boolean
-ERROR:  operator does not exist: anyrange @> information_schema.sql_identifier
-ERROR:  operator does not exist: jsonpath = jsonpath
-ERROR:  correlated subquery with skip-level correlations is not supported
-ERROR:  function pg_catalog.jsonb_delete(jsonb, text[]) does not exist
-ERROR:  operator does not exist: anyrange @> integer
-ERROR:  operator does not exist: anyrange @> numeric
-ERROR:  operator does not exist: text <@ anyrange
-ERROR:  COALESCE types anyrange and int8range cannot be matched
-ERROR:  COALESCE types int8range and anyrange cannot be matched
-ERROR:  cannot cast type anyarray to text[]
-ERROR:  could not identify an equality operator for type void
-ERROR:  operator does not exist: anyrange @> "char"
-ERROR:  operator does not exist: anyrange @> regproc
-ERROR:  operator does not exist: oid <@ anyrange
-ERROR:  cannot accept a value of type event_trigger
-ERROR:  cannot accept a value of type fdw_handler
-ERROR:  cannot accept a value of type index_am_handler
-ERROR:  cannot accept a value of type opaque
-ERROR:  could not identify an ordering operator for type anyarray
-ERROR:  could not identify an ordering operator for type json
-ERROR:  could not identify an ordering operator for type void
-ERROR:  lastval() not supported
-ERROR:  operator does not exist: anyrange &> int4range
-ERROR:  operator does not exist: anyrange = int8range
-ERROR:  operator does not exist: anyrange >= int4range
-ERROR:  operator does not exist: anyrange @> bigint
-ERROR:  operator does not exist: daterange = anyrange
-ERROR:  operator does not exist: int8range = anyrange
-ERROR:  operator does not exist: numeric <@ anyrange
-ERROR:  operator does not exist: tstzrange = anyrange
-ERROR:  operator does not exist: void = void
-ERROR:  COALESCE types anyrange and int4range cannot be matched
-ERROR:  COALESCE types anyrange and tsrange cannot be matched
-ERROR:  COALESCE types int4range and anyrange cannot be matched
-ERROR:  COALESCE types numrange and anyrange cannot be matched
-ERROR:  COALESCE types tsrange and anyrange cannot be matched
-ERROR:  argument declared anyrange is not a range type but type anyrange
-ERROR:  cannot accept a value of type language_handler
-ERROR:  cannot accept a value of type trigger
-ERROR:  cannot cast type anyarray to aclitem[]
-ERROR:  cannot cast type anyarray to int2vector
-ERROR:  cannot cast type anyarray to interval[]
-ERROR:  cannot cast type unknown to anytable
-ERROR:  cannot display a value of type fdw_handler
-ERROR:  could not devise a query plan for the given query (pathnode.c:275)
-ERROR:  could not identify an equality operator for type anyarray
-ERROR:  could not identify an equality operator for type json
-ERROR:  could not identify an ordering operator for type fdw_handler
-ERROR:  could not identify an ordering operator for type path
-ERROR:  could not identify an ordering operator for type xml
-ERROR:  exclusive backup not in progress
-ERROR:  failed to find conversion function from unknown to text (parse_coerce.c:
-ERROR:  fixedwidth_in: not called by format manager
-ERROR:  fixedwidth_out: not called by format manager
-ERROR:  operator does not exist: "any" = text
-ERROR:  operator does not exist: anyarray < integer[]
+ERROR:  operator does not exist: anyarray < box
 ERROR:  operator does not exist: anyarray <= integer[]
+ERROR:  operator does not exist: anyarray < integer[]
+ERROR:  operator does not exist: anyarray = line
+ERROR:  operator does not exist: anyarray <@ name
 ERROR:  operator does not exist: anyarray @> name
-ERROR:  operator does not exist: anyrange &< int8range
-ERROR:  operator does not exist: anyrange &> daterange
-ERROR:  operator does not exist: anyrange -|- daterange
-ERROR:  operator does not exist: anyrange <= tstzrange
-ERROR:  operator does not exist: anyrange <> int4range
-ERROR:  operator does not exist: anyrange <> int8range
-ERROR:  operator does not exist: anyrange <@ numrange
+ERROR:  operator does not exist: anyrange @> bigint
+ERROR:  operator does not exist: anyrange @> boolean
+ERROR:  operator does not exist: anyrange @> "char"
+ERROR:  operator does not exist: anyrange <@ daterange
 ERROR:  operator does not exist: anyrange = daterange
-ERROR:  operator does not exist: anyrange = int4range
 ERROR:  operator does not exist: anyrange >= daterange
+ERROR:  operator does not exist: anyrange -|- daterange
+ERROR:  operator does not exist: anyrange &> daterange
+ERROR:  operator does not exist: anyrange && daterange
 ERROR:  operator does not exist: anyrange @> double precision
+ERROR:  operator does not exist: anyrange @> information_schema.cardinal_number
 ERROR:  operator does not exist: anyrange @> information_schema.character_data
+ERROR:  operator does not exist: anyrange @> information_schema.sql_identifier
 ERROR:  operator does not exist: anyrange @> information_schema.yes_or_no
+ERROR:  operator does not exist: anyrange <> int4range
+ERROR:  operator does not exist: anyrange = int4range
+ERROR:  operator does not exist: anyrange >= int4range
+ERROR:  operator does not exist: anyrange > int4range
 ERROR:  operator does not exist: anyrange @> int4range
+ERROR:  operator does not exist: anyrange &> int4range
+ERROR:  operator does not exist: anyrange <= int8range
+ERROR:  operator does not exist: anyrange <> int8range
+ERROR:  operator does not exist: anyrange = int8range
+ERROR:  operator does not exist: anyrange -|- int8range
+ERROR:  operator does not exist: anyrange &< int8range
+ERROR:  operator does not exist: anyrange && int8range
+ERROR:  operator does not exist: anyrange @> integer
 ERROR:  operator does not exist: anyrange @> interval
+ERROR:  operator does not exist: anyrange @> numeric
+ERROR:  operator does not exist: anyrange <= numrange
+ERROR:  operator does not exist: anyrange <@ numrange
+ERROR:  operator does not exist: anyrange = numrange
+ERROR:  operator does not exist: anyrange >= numrange
 ERROR:  operator does not exist: anyrange @> numrange
+ERROR:  operator does not exist: anyrange && numrange
+ERROR:  operator does not exist: anyrange @> oid
+ERROR:  operator does not exist: anyrange @> regproc
+ERROR:  operator does not exist: anyrange @> smallint
 ERROR:  operator does not exist: anyrange @> timestamp with time zone
+ERROR:  operator does not exist: anyrange @> time without time zone
+ERROR:  operator does not exist: anyrange <= tsrange
+ERROR:  operator does not exist: anyrange <> tsrange
+ERROR:  operator does not exist: anyrange = tsrange
 ERROR:  operator does not exist: anyrange @> tsrange
+ERROR:  operator does not exist: anyrange <= tstzrange
+ERROR:  operator does not exist: anyrange = tstzrange
+ERROR:  operator does not exist: anyrange >= tstzrange
+ERROR:  operator does not exist: anyrange @> tstzrange
+ERROR:  operator does not exist: "any" = text
+ERROR:  operator does not exist: bigint[] >= name[]
+ERROR:  operator does not exist: bigint <@ numrange
 ERROR:  operator does not exist: boolean <@ anyrange
-ERROR:  operator does not exist: daterange &< anyrange
+ERROR:  operator does not exist: cstring = cstring
+ERROR:  operator does not exist: daterange << anyrange
+ERROR:  operator does not exist: daterange <= anyrange
 ERROR:  operator does not exist: daterange < anyrange
-ERROR:  operator does not exist: daterange < int8range
 ERROR:  operator does not exist: daterange <@ anyrange
+ERROR:  operator does not exist: daterange = anyrange
+ERROR:  operator does not exist: daterange >= anyrange
+ERROR:  operator does not exist: daterange &< anyrange
+ERROR:  operator does not exist: daterange &> anyrange
+ERROR:  operator does not exist: daterange && anyrange
+ERROR:  operator does not exist: daterange < int8range
+ERROR:  operator does not exist: daterange = int8range
+ERROR:  operator does not exist: daterange = numrange
+ERROR:  operator does not exist: daterange &> numrange
 ERROR:  operator does not exist: daterange = tsrange
+ERROR:  operator does not exist: daterange = tstzrange
 ERROR:  operator does not exist: double precision <@ anyrange
 ERROR:  operator does not exist: information_schema.character_data <@ anyrange
+ERROR:  operator does not exist: information_schema.sql_identifier <@ anyrange
+ERROR:  operator does not exist: int4range <> anyrange
+ERROR:  operator does not exist: int4range = anyrange
+ERROR:  operator does not exist: int4range >= anyrange
+ERROR:  operator does not exist: int4range -|- anyrange
+ERROR:  operator does not exist: int4range &< anyrange
+ERROR:  operator does not exist: int4range &> anyrange
 ERROR:  operator does not exist: int4range && anyrange
 ERROR:  operator does not exist: int4range && int8range
-ERROR:  operator does not exist: int4range &> anyrange
-ERROR:  operator does not exist: int4range -|- anyrange
+ERROR:  operator does not exist: int4range @> smallint
+ERROR:  operator does not exist: int4range @> text
 ERROR:  operator does not exist: int4range = tstzrange
-ERROR:  operator does not exist: int4range >= anyrange
-ERROR:  operator does not exist: int8range &> anyrange
-ERROR:  operator does not exist: int8range -|- daterange
+ERROR:  operator does not exist: int4range > tstzrange
 ERROR:  operator does not exist: int8range << anyrange
 ERROR:  operator does not exist: int8range <= anyrange
-ERROR:  operator does not exist: int8range > anyrange
+ERROR:  operator does not exist: int8range <> anyrange
+ERROR:  operator does not exist: int8range < anyrange
+ERROR:  operator does not exist: int8range <@ anyrange
+ERROR:  operator does not exist: int8range = anyrange
 ERROR:  operator does not exist: int8range >= anyrange
 ERROR:  operator does not exist: int8range >> anyrange
+ERROR:  operator does not exist: int8range > anyrange
 ERROR:  operator does not exist: int8range @> anyrange
+ERROR:  operator does not exist: int8range &< anyrange
+ERROR:  operator does not exist: int8range &> anyrange
+ERROR:  operator does not exist: int8range -|- daterange
+ERROR:  operator does not exist: int8range < numrange
+ERROR:  operator does not exist: int8range @> text
 ERROR:  operator does not exist: integer <@ anyrange
 ERROR:  operator does not exist: integer <@ daterange
 ERROR:  operator does not exist: integer <@ tsrange
 ERROR:  operator does not exist: json = json
-ERROR:  operator does not exist: name && bigint[]
-ERROR:  operator does not exist: name < point
+ERROR:  operator does not exist: jsonpath = jsonpath
 ERROR:  operator does not exist: name <@ anyarray
-ERROR:  operator does not exist: numrange -|- anyrange
+ERROR:  operator does not exist: name > anyarray
+ERROR:  operator does not exist: name && anyarray
+ERROR:  operator does not exist: name && bigint[]
+ERROR:  operator does not exist: name <@ name
+ERROR:  operator does not exist: name @> name
+ERROR:  operator does not exist: name && name
+ERROR:  operator does not exist: name < point
+ERROR:  operator does not exist: numeric <@ anyrange
+ERROR:  operator does not exist: numrange << anyrange
 ERROR:  operator does not exist: numrange <= anyrange
 ERROR:  operator does not exist: numrange = anyrange
+ERROR:  operator does not exist: numrange > anyrange
+ERROR:  operator does not exist: numrange -|- anyrange
 ERROR:  operator does not exist: numrange = int8range
-ERROR:  operator does not exist: numrange = tsrange
 ERROR:  operator does not exist: numrange @> integer
+ERROR:  operator does not exist: numrange = tsrange
+ERROR:  operator does not exist: oid <@ anyrange
 ERROR:  operator does not exist: oid <@ daterange
+ERROR:  operator does not exist: oid <@ int4range
 ERROR:  operator does not exist: oid <@ int8range
+ERROR:  operator does not exist: pg_mcv_list <@ tsrange
+ERROR:  operator does not exist: point = point
 ERROR:  operator does not exist: point >= point
+ERROR:  operator does not exist: polygon = polygon
 ERROR:  operator does not exist: smallint <@ anyrange
 ERROR:  operator does not exist: smallint <@ int4range
+ERROR:  operator does not exist: text <@ anyrange
+ERROR:  operator does not exist: text = bigint[]
 ERROR:  operator does not exist: text[] < name
+ERROR:  operator does not exist: timestamp with time zone <@ anyrange
 ERROR:  operator does not exist: time without time zone <@ anyrange
+ERROR:  operator does not exist: tsrange << anyrange
 ERROR:  operator does not exist: tsrange < anyrange
 ERROR:  operator does not exist: tsrange = anyrange
+ERROR:  operator does not exist: tsrange -|- anyrange
 ERROR:  operator does not exist: tsrange > numrange
 ERROR:  operator does not exist: tsrange @> record
-ERROR:  operator does not exist: tstzrange &< daterange
-ERROR:  operator does not exist: tstzrange -|- anyrange
 ERROR:  operator does not exist: tstzrange < anyrange
-ERROR:  operator does not exist: tstzrange >> anyrange
-ERROR:  operator does not exist: txid_snapshot = txid_snapshot
-ERROR:  operator does not exist: xml = xml
-ERROR:  operator does not exist: anyarray < box
-ERROR:  operator does not exist: anyarray <@ name
-ERROR:  operator does not exist: anyarray = line
-ERROR:  operator does not exist: anyrange && numrange
-ERROR:  operator does not exist: anyrange <> tsrange
-ERROR:  operator does not exist: anyrange @> information_schema.cardinal_number
-ERROR:  operator does not exist: anyrange @> time without time zone
-ERROR:  operator does not exist: bigint <@ numrange
-ERROR:  operator does not exist: daterange &> anyrange
-ERROR:  operator does not exist: daterange << anyrange
-ERROR:  operator does not exist: daterange <= anyrange
-ERROR:  operator does not exist: daterange = int8range
-ERROR:  operator does not exist: daterange = tstzrange
-ERROR:  operator does not exist: int4range = anyrange
-ERROR:  operator does not exist: int8range &< anyrange
-ERROR:  operator does not exist: int8range <> anyrange
-ERROR:  operator does not exist: int8range @> text
-ERROR:  operator does not exist: name && anyarray
-ERROR:  operator does not exist: oid <@ int4range
-ERROR:  operator does not exist: tstzrange <= numrange
-ERROR:  operator does not exist: tstzrange @> anyrange
-ERROR:  operator does not exist: anyrange && daterange
-ERROR:  operator does not exist: anyrange && int8range
-ERROR:  operator does not exist: anyrange -|- int8range
-ERROR:  operator does not exist: anyrange = tsrange
-ERROR:  operator does not exist: anyrange = tstzrange
-ERROR:  operator does not exist: anyrange > int4range
-ERROR:  operator does not exist: anyrange >= numrange
-ERROR:  operator does not exist: anyrange >= tstzrange
-ERROR:  operator does not exist: anyrange @> smallint
-ERROR:  operator does not exist: anyrange @> tstzrange
-ERROR:  operator does not exist: bigint[] >= name[]
-ERROR:  operator does not exist: daterange && anyrange
-ERROR:  operator does not exist: daterange &> numrange
-ERROR:  operator does not exist: int4range <> anyrange
-ERROR:  operator does not exist: int4range > tstzrange
-ERROR:  operator does not exist: int4range @> text
-ERROR:  operator does not exist: int8range < anyrange
-ERROR:  operator does not exist: int8range < numrange
-ERROR:  operator does not exist: name > anyarray
-ERROR:  operator does not exist: numrange << anyrange
-ERROR:  operator does not exist: numrange > anyrange
-ERROR:  operator does not exist: tsrange -|- anyrange
-ERROR:  operator does not exist: tsrange << anyrange
-ERROR:  operator does not exist: tstzrange &< anyrange
+ERROR:  operator does not exist: tstzrange = anyrange
 ERROR:  operator does not exist: tstzrange >= anyrange
+ERROR:  operator does not exist: tstzrange >> anyrange
+ERROR:  operator does not exist: tstzrange -|- anyrange
+ERROR:  operator does not exist: tstzrange @> anyrange
+ERROR:  operator does not exist: tstzrange &< anyrange
+ERROR:  operator does not exist: tstzrange &< daterange
+ERROR:  operator does not exist: tstzrange <= numrange
 ERROR:  operator does not exist: tstzrange @> numrange
-ERROR:  operator does not exist: anyrange <= int8range
-ERROR:  operator does not exist: anyrange <= numrange
-ERROR:  operator does not exist: anyrange <= tsrange
-ERROR:  operator does not exist: anyrange <@ daterange
-ERROR:  operator does not exist: anyrange = numrange
-ERROR:  operator does not exist: daterange = numrange
-ERROR:  operator does not exist: daterange >= anyrange
-ERROR:  operator does not exist: int4range &< anyrange
-ERROR:  operator does not exist: int4range @> smallint
-ERROR:  operator does not exist: int8range <@ anyrange
-ERROR:  operator does not exist: pg_mcv_list <@ tsrange
-ERROR:  operator does not exist: text = bigint[]
-ERROR:  operator does not exist: timestamp with time zone <@ anyrange
-ERROR:  function with EXECUTE ON restrictions cannot be used in the SELECT list
+ERROR:  operator does not exist: txid_snapshot = txid_snapshot
+ERROR:  operator does not exist: void = void
+ERROR:  operator does not exist: xml = xml
