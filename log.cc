@@ -143,8 +143,8 @@ void cerr_logger::report()
 void cerr_logger::generated(prod &p)
 {
   stats_collecting_logger::generated(p);
-  if ((10*columns-1) == queries%(10*columns))
-    report();
+//  if ((10*columns-1) == queries%(10*columns))
+//    report();
 }
 
 void cerr_logger::executed(prod &query)

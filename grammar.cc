@@ -472,9 +472,10 @@ upsert_stmt::upsert_stmt(prod *p, struct scope *s, table *v)
 
 shared_ptr<prod> statement_factory(struct scope *s)
 {
+  auto support_merge = s->schema->support_feature("merge_into");
   try {
     s->new_stmt();
-    if (d42() == 1)
+    if (support_merge && d42() == 1)
       return make_shared<merge_stmt>((struct prod *)0, s);
     if (d42() == 1)
       return make_shared<insert_stmt>((struct prod *)0, s);
