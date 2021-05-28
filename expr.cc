@@ -195,12 +195,17 @@ void coalesce::out(std::ostream &out)
 nullif::nullif(prod *p, sqltype *type_constraint)
     : value_expr(p)
 {
+  int n_retry = 20;
   std::vector<sqltype*> second_types;
+
+retry:
+  second_types.clear();
   first_expr = value_expr::factory(this, type_constraint);
+  type = first_expr->type;
   auto &idx = p->scope->schema->operators_returning_type;
   auto iters = idx.equal_range(scope->schema->booltype);
-  type = first_expr->type;
-  assert(!type_constraint || type == type_constraint);
+  assert(type);
+  assert(!type_constraint || type_constraint == type || type_constraint->consistent(type));
   // opname is '=', and left is type_constraint
   for (auto it = iters.first; it != iters.second; ++it) {
     if (it->second->name != "=")
@@ -209,11 +214,26 @@ nullif::nullif(prod *p, sqltype *type_constraint)
       second_types.push_back(it->second->right);
     }
   }
-  if (second_types.empty())
-    fail("can't find nullif");
+  if (second_types.empty()) {
+    // no type of the second operand exists for equality with the first operand
+    if (type_constraint != type && --n_retry >= 0)
+      goto retry;
+    else
+      fail("can't find nullif");
+  }
 
   auto oper = random_pick<>(second_types);
   second_expr = value_expr::factory(this, oper);
+
+  /// verify
+  for (auto tp : second_types) {
+    if (second_expr->type == tp)
+      return;
+  }
+  if (n_retry == 0)
+    fail("can't choose nullif");
+  n_retry--;
+  goto retry;
 }
 
 void nullif::out(std::ostream &out)
