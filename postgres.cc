@@ -36,9 +36,9 @@ bool pg_type::consistent(sqltype *rvalue)
 
   case 'p':
     if (name == "anyarray") {
-      return t->typelem_ != InvalidOid;
+      return t->typcategory_ == 'A';
     } else if (name == "anynonarray") {
-      return t->typelem_ == InvalidOid;
+      return t->typcategory_ != 'A';
     } else if(name == "anyenum") {
       return t->typtype_ == 'e';
     } else if (name == "any") {
@@ -112,7 +112,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
 
   cerr << "Loading types...";
 
-  r = w.exec("select quote_ident(typname), oid, typdelim, typrelid, typelem, typarray, typtype "
+  r = w.exec("select quote_ident(typname), oid, typdelim, typrelid, typelem, typarray, typtype, typcategory "
              "from pg_type ");
 
   for (auto row = r.begin(); row != r.end(); ++row) {
@@ -123,12 +123,15 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
     OID typelem(row[4].as<OID>());
     OID typarray(row[5].as<OID>());
     string typtype(row[6].as<string>());
+    string typcategory(row[7].as<string>());
     //       if (schema == "pg_catalog")
     // 	continue;
     //       if (schema == "information_schema")
     // 	continue;
+    if (name == "unknown")
+      continue;
 
-    pg_type *t = new pg_type(name,oid,typdelim[0],typrelid, typelem, typarray, typtype[0]);
+    pg_type *t = new pg_type(name,oid,typdelim[0],typrelid, typelem, typarray, typtype[0], typcategory[0]);
     oid2type[oid] = t;
     name2type[name] = t;
     types.push_back(t);
@@ -173,8 +176,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
              "from pg_attribute join pg_class c on( c.oid = attrelid ) "
              "join pg_namespace n on n.oid = relnamespace "
              "where not attisdropped "
-             "and attname not in "
-             "('xmin', 'xmax', 'ctid', 'cmin', 'cmax', 'tableoid', 'oid') ");
+             "and attnum > 0");
     q += " and relname = " + w.quote(t->name);
     q += " and nspname = " + w.quote(t->schema);
 
@@ -220,6 +222,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
              "and proname <> 'pg_event_trigger_table_rewrite_reason' "
              "and proname <> 'pg_event_trigger_table_rewrite_oid' "
              "and proname !~ '^ri_fkey_' "
+             "and proname !~ '^unknown' "
              "and not (proretset or " + procedure_is_aggregate + " or " + procedure_is_window + ") ");
 
   for (auto row : r) {

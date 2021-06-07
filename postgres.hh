@@ -18,20 +18,22 @@ extern "C" {
 
 struct pg_type : sqltype {
   OID oid_;
-  char typdelim_;
   OID typrelid_;
   OID typelem_;
   OID typarray_;
   char typtype_;
+  char typcategory_;
+  char typdelim_;
   pg_type(string name,
   OID oid,
   char typdelim,
   OID typrelid,
   OID typelem,
   OID typarray,
-  char typtype)
-    : sqltype(name), oid_(oid), typdelim_(typdelim), typrelid_(typrelid),
-      typelem_(typelem), typarray_(typarray), typtype_(typtype) { }
+  char typtype,
+  char typcategory)
+    : sqltype(name), oid_(oid), typrelid_(typrelid), typelem_(typelem), typarray_(typarray),
+      typtype_(typtype), typcategory_(typcategory), typdelim_(typdelim) { }
 
   virtual bool consistent(struct sqltype *rvalue);
   bool consistent_(sqltype *rvalue);
