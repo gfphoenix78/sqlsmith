@@ -12,8 +12,10 @@ using boost::smatch;
 using boost::regex_match;
 #endif
 
+#include <regex>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 extern "C" {
 #include <string.h>
@@ -30,6 +32,7 @@ using namespace std;
 using namespace pqxx;
 
 std::unordered_set<std::string> known_errors;
+std::vector<std::regex> known_errors_re;
 
 void loadKnownErrors(const std::string &filename)
 {
@@ -51,13 +54,38 @@ void loadKnownErrors(const std::string &filename)
   fclose(file);
   std::cout << "done." << std::endl;
 }
+
+void loadKnownErrorsRe(const std::string &filename)
+{
+  std::cout << "Loading known errors for regex...";
+  char line[2048];
+  FILE *file = fopen(filename.c_str(), "r");
+  if (!file) {
+    std::cout << "Failed to open '" << filename << "': ";
+    std::cout << strerror(errno) << std::endl;
+    return;
+  }
+  while (fgets(line, sizeof(line), file) != NULL) {
+    auto len = strlen(line);
+    if (len > 0 && line[len - 1] == '\n')
+      line[--len] = '\0';
+    if (len > 0)
+      known_errors_re.push_back(
+        std::regex(line, std::regex_constants::ECMAScript));
+  }
+  fclose(file);
+  std::cout << "done." << std::endl;
+}
+
 bool isKnownError(const std::string &error)
 {
-  return known_errors.find(error) != known_errors.end();
-}
-bool isKnownError(const char *error)
-{
-  return known_errors.find(error) != known_errors.end();
+  if (known_errors.find(error) != known_errors.end())
+    return true;
+  for (auto &pattern : known_errors_re) {
+    if (std::regex_search(error, pattern))
+      return true;
+  }
+  return false;
 }
 
 // returns true if the error is unknown

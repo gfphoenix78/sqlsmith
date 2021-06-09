@@ -1,5 +1,6 @@
 #include "postgres.hh"
 #include "config.h"
+#include "expr.hh"
 #include <string.h>
 #include <iostream>
 
@@ -14,8 +15,17 @@ using boost::regex_match;
 
 using namespace std;
 
+static OID public_namespace;
+static OID pg_catalog_namespace;
+static map<OID, string> oid2namespace;
+
 static regex e_timeout("ERROR:  canceling statement due to statement timeout(\n|.)*");
 static regex e_syntax("ERROR:  syntax error at or near(\n|.)*");
+
+static inline bool is_pseudo_type(pg_type *t)
+{
+  return t->typtype_ == 'p';
+}
 
 bool pg_type::consistent(sqltype *rvalue)
 {
@@ -44,7 +54,8 @@ bool pg_type::consistent(sqltype *rvalue)
     } else if (name == "any") {
       return true;
     } else if (name == "anyelement") {
-      return t->typelem_ == InvalidOid;
+//      return t->typcategory_ == 'A' && t->typelem_ == this->oid_;
+      return false;
     } else if (name == "anyrange") {
       return t->typtype_ == 'r';
     } else if (name == "record") {
@@ -59,6 +70,15 @@ bool pg_type::consistent(sqltype *rvalue)
     throw std::logic_error("unknown typtype");
   }
 }
+
+string pg_type::fullName() const
+{
+  auto ns = typnamespace_;
+  if (ns == public_namespace || ns == pg_catalog_namespace)
+    return name;
+  return oid2namespace[ns] + "." + name;
+}
+          
 
 dut_pqxx::dut_pqxx(std::string conninfo)
   : c(conninfo)
@@ -110,14 +130,28 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
   string procedure_is_aggregate = version_num < 110000 ? "proisagg" : "prokind = 'a'";
   string procedure_is_window = version_num < 110000 ? "proiswindow" : "prokind = 'w'";
 
+  cerr << "Loading namespaces...";
+  r = w.exec("select oid, nspname from pg_namespace");
+  for (auto row = r.begin(); row != r.end(); ++row) {
+    OID oid(row[0].as<OID>());
+    string name(row[1].as<string>());
+    if (name == "public")
+      public_namespace = oid;
+    else if (name == "pg_catalog")
+      pg_catalog_namespace = oid;
+    oid2namespace[oid] = name;
+  }
+  cerr << "done." << endl;
+
   cerr << "Loading types...";
 
-  r = w.exec("select quote_ident(typname), oid, typdelim, typrelid, typelem, typarray, typtype, typcategory "
+  r = w.exec("select quote_ident(typname), oid, typdelim, typrelid, typelem, typarray, typtype, typcategory, typnamespace "
              "from pg_type ");
 
   for (auto row = r.begin(); row != r.end(); ++row) {
     string name(row[0].as<string>());
     OID oid(row[1].as<OID>());
+    OID typnamespace(row[8].as<OID>());
     string typdelim(row[2].as<string>());
     OID typrelid(row[3].as<OID>());
     OID typelem(row[4].as<OID>());
@@ -131,7 +165,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
     if (name == "unknown")
       continue;
 
-    pg_type *t = new pg_type(name,oid,typdelim[0],typrelid, typelem, typarray, typtype[0], typcategory[0]);
+    pg_type *t = new pg_type(name,oid, typnamespace, typdelim[0],typrelid, typelem, typarray, typtype[0], typcategory[0]);
     oid2type[oid] = t;
     name2type[name] = t;
     types.push_back(t);
@@ -144,6 +178,18 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
   arraytype = name2type["anyarray"];
 
   cerr << "done." << endl;
+
+  // load range types
+  cerr << "Loading range types...";
+  r = w.exec("select tp.oid, r.rngsubtype from pg_type as tp left join pg_range as r "
+             "on tp.oid=r.rngtypid where tp.typtype='r'");
+  for (auto row = r.begin(); row != r.end(); ++row) {
+    OID range_type(row[0].as<OID>());
+    OID sub_type(row[1].as<OID>());
+    oid2type[range_type]->typelem_ = sub_type;
+  }
+  cerr << "done." << endl;
+
 
   cerr << "Loading tables...";
   r = w.exec("select table_name, "
@@ -378,4 +424,64 @@ void dut_libpq::test(const std::string &stmt)
     command("BEGIN;");
     command(stmt.c_str());
     command("ROLLBACK;");
+}
+
+bool comparison_op::Init()
+{
+  int n_retry = 20;
+
+retry:
+  pg_type *left, *right;
+  pg_type *ptype_left, *ptype_right;
+  auto &idx = this->scope->schema->operators_returning_type;
+
+  auto iters = idx.equal_range(scope->schema->booltype);
+  oper = random_pick<>(iters)->second;
+  left = dynamic_cast<pg_type*>(oper->left);
+  right = dynamic_cast<pg_type*>(oper->right);
+  assert(left && right);
+
+  lhs = value_expr::factory(this, oper->left);
+  rhs = value_expr::factory(this, oper->right);
+
+  if (oper->left == oper->right) {
+    if (lhs->type == rhs->type)
+      return true;
+
+    if (lhs->type->consistent(rhs->type))
+      lhs = value_expr::factory(this, rhs->type);
+    else
+      rhs = value_expr::factory(this, lhs->type);
+    if (lhs->type != rhs->type)
+      goto fail;
+    return true;
+  }
+  return true;
+
+  ptype_left = dynamic_cast<pg_type*>(lhs->type);
+  ptype_right = dynamic_cast<pg_type*>(rhs->type);
+  assert(ptype_left && ptype_right && ptype_left != ptype_right);
+//  if (ptype_left->name == "text" || ptype_right->name == "text")
+    cerr << "\nFound text type: (" << left->name << ", "
+         << right->name << ") get (" << ptype_left->name << ", "
+         << ptype_right << ")" << endl;
+
+  if (left->name == "anyrange" || right->name == "anyrange") {
+    // the other must be anyelement
+    assert(left->name == "anyelement" || right->name == "anyelement");
+    if ((ptype_left->typtype_ == 'r' && ptype_left->typelem_ == ptype_right->oid_) ||
+        (ptype_right->typtype_ == 'r' && ptype_right->typelem_ == ptype_left->oid_))
+      return true;
+  } else if (left->name == "anyarray" || right->name == "anyarray") {
+    assert(left->name == "anyelement" || right->name == "anyelement");
+    if ((ptype_left->typcategory_ == 'A' && ptype_left->typelem_ == ptype_right->oid_) ||
+        (ptype_right->typcategory_ == 'A' && ptype_right->typelem_ == ptype_left->oid_))
+      return true;
+  } else {
+  }
+
+fail:
+  if (--n_retry >= 0)
+    goto retry;
+  throw std::runtime_error("Can't build comparision:");
 }

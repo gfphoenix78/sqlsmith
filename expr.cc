@@ -61,7 +61,7 @@ void case_expr::out(std::ostream &out)
 {
   out << "case when " << *condition;
   out << " then " << *true_expr;
-  out << " else " << *true_expr;
+  out << " else " << *false_expr;
   out << " end";
   indent(out);
 }
@@ -142,22 +142,32 @@ distinct_pred::distinct_pred(prod *p) : bool_binop(p)
 
 comparison_op::comparison_op(prod *p) : bool_binop(p)
 {
-  auto &idx = p->scope->schema->operators_returning_type;
-
-  auto iters = idx.equal_range(scope->schema->booltype);
-  oper = random_pick<>(iters)->second;
-
-  lhs = value_expr::factory(this, oper->left);
-  rhs = value_expr::factory(this, oper->right);
-
-  if (oper->left == oper->right
-       && lhs->type != rhs->type) {
-
-    if (lhs->type->consistent(rhs->type))
-      lhs = value_expr::factory(this, rhs->type);
-    else
-      rhs = value_expr::factory(this, lhs->type);
-  }
+//  int n_retry = 20;
+//
+//retry:
+//  auto &idx = p->scope->schema->operators_returning_type;
+//
+//  auto iters = idx.equal_range(scope->schema->booltype);
+//  oper = random_pick<>(iters)->second;
+//
+//  lhs = value_expr::factory(this, oper->left);
+//  rhs = value_expr::factory(this, oper->right);
+//
+//  if (oper->left == oper->right
+//       && lhs->type != rhs->type) {
+//
+//    if (lhs->type->consistent(rhs->type))
+//      lhs = value_expr::factory(this, rhs->type);
+//    else
+//      rhs = value_expr::factory(this, lhs->type);
+//    if (lhs->type != rhs->type) {
+//      if (--n_retry >= 0)
+//        goto retry;
+//      throw std::runtime_error("Can't build comparision:");
+//    }
+//  }
+  if (!this->Init())
+    throw std::runtime_error("comparison_op failed");
 }
 
 coalesce::coalesce(prod *p, sqltype *type_constraint, const char *abbrev)
@@ -189,7 +199,7 @@ void coalesce::out(std::ostream &out)
       out << ",", indent(out);
   }
   out << ")";
-  out << " as " << type->name << ")";
+  out << " as " << type->fullName() << ")";
 }
 
 nullif::nullif(prod *p, sqltype *type_constraint)
@@ -241,7 +251,7 @@ void nullif::out(std::ostream &out)
   out << "cast(nullif("
     << *first_expr << ", "
     << *second_expr << ")"
-    << " as " << type->name << ")";
+    << " as " << type->fullName() << ")";
 }
 
 const_expr::const_expr(prod *p, sqltype *type_constraint)
@@ -256,7 +266,7 @@ const_expr::const_expr(prod *p, sqltype *type_constraint)
   else if (dynamic_cast<insert_stmt*>(p) && (d6() > 3))
     expr += "default";
   else
-    expr += "cast(null as " + type->name + ")";
+    expr += "cast(null as " + type->fullName() + ")";
 }
 
 funcall::funcall(prod *p, sqltype *type_constraint, bool agg)
@@ -288,9 +298,9 @@ funcall::funcall(prod *p, sqltype *type_constraint, bool agg)
     goto retry;
   }
 
-  if (type_constraint)
-    type = type_constraint;
-  else
+//  if (type_constraint)
+//    type = type_constraint;
+//  else
     type = proc->restype;
 
   if (type == scope->schema->internaltype) {
@@ -317,7 +327,7 @@ void funcall::out(std::ostream &out)
   out << proc->ident() << "(";
   for (auto expr = parms.begin(); expr != parms.end(); expr++) {
     indent(out);
-    out << "cast(" << **expr << " as " << (*expr)->type->name << ")";
+    out << "cast(" << **expr << " as " << (*expr)->type->fullName() << ")";
     if (expr+1 != parms.end())
       out << ",";
   }

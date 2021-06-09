@@ -32,6 +32,7 @@ struct sqltype {
       grammar will use fixpoint iteration to resolve type conformance
       situations in the direction of more concrete types  */
   virtual bool consistent(struct sqltype *rvalue);
+  virtual string fullName() const { return name; }
 };
 
 struct column {

@@ -12,8 +12,8 @@
 #include "dut.hh"
 
 void loadKnownErrors(const std::string &filename);
+void loadKnownErrorsRe(const std::string &filename);
 bool isKnownError(const std::string &error);
-bool isKnownError(const char *error);
 
 /// logger base class
 struct logger {

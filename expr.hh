@@ -170,6 +170,7 @@ struct distinct_pred : bool_binop {
 
 struct comparison_op : bool_binop {
   op *oper;
+  bool Init();
   comparison_op(prod *p);
   virtual ~comparison_op() { };
   virtual void out(std::ostream &o) {

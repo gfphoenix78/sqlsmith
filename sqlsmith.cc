@@ -236,6 +236,7 @@ int main(int argc, char *argv[])
         dut = make_shared<dut_libpq>(options["target"]);
 
       loadKnownErrors("known.txt");
+      loadKnownErrorsRe("known_re.txt");
       int exitValue = 0;
       while (1) /* Loop to recover connection loss */
       {
