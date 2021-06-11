@@ -28,7 +28,8 @@ pushd ${CWDIR}/../../
 createdb sqlsmith
 ldd ./sqlsmith | grep libpq
 
-./sqlsmith --verbose --target="port=\$PGPORT host=/tmp dbname=sqlsmith" --max-queries=10000
+./sqlsmith --verbose --target="port=\$PGPORT host=/tmp dbname=sqlsmith" --max-queries=10000 && touch /tmp/pipeline_status_OK || echo "pipeline failed"
+
 popd
 EOF
 
@@ -37,6 +38,24 @@ EOF
     chmod a+x  test_run.sh
   popd
   su gpadmin -c "/bin/bash /home/gpadmin/test_run.sh"
+
+  ls /tmp/core.postgres* 2>/dev/null && has_core=yes || echo "No core dump files"
+  if [ "$has_core" == "yes" ]; then
+    local coredump=coredump-$(date +"%F--%H-%M-%S").tar
+    pushd ${TOP_DIR}/bin_gpdb
+    tar cf ~/$coredump bin_gpdb.tar.gz
+    popd
+
+    pushd /tmp
+    for cc in core.postgres* ;
+    do
+        tar rf ~/$coredump $cc
+    done
+    mv ~/$coredump ${TOP_DIR}/sqlsmith/ 
+    echo "@@@@ Found core dump files @@@@"
+  fi
+  [ -f /tmp/pipeline_status_OK ] || exit 1
+  exit 0
 }
 
 function setup_gpadmin_user() {

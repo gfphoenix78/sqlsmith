@@ -9,6 +9,7 @@ inputs:
   - name: bin_gpdb
 
 outputs:
+  - name: sqlsmith
 
 run:
   path: sqlsmith_src/concourse/scripts/test_sqlsmith.sh
