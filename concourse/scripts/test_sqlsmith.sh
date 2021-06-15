@@ -51,6 +51,12 @@ EOF
     do
         tar rf ~/$coredump $cc
     done
+    # attach log of master node
+    pushd ${TOP_DIR}/gpdb_src/gpAux/gpdemo/datadirs/qddir/demoDataDir-1/
+    [ -d "pg_log" ] && tar rf ~/$coredump pg_log
+    [ -d "log" ] && tar rf ~/$coredump log
+    popd
+
     mv ~/$coredump ${TOP_DIR}/sqlsmith/ 
     echo "@@@@ Found core dump files @@@@"
   fi
